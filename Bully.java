@@ -10,14 +10,41 @@
  *  no ambiente para que o mecanismo funcione.
  */
 
-import java.io;
-import java.util;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.util.ArrayList;
 
- public class Bully{
-   public static void main(String args[]){
-      File configFile = new File(args[0]);
-      Scanner configReader = new Scanner(configFile);
+public class Bully {
+  public static ArrayList<String> neighbours = new ArrayList<String>();
+  public static String myStats;
+  public static void main(String args[]) throws FileNotFoundException {
+    File configFile = new File(args[0]);
+    Scanner configReader = new Scanner(configFile);
 
-      
-   }
- }
+    int myConfigLine = Integer.parseInt(args[1]);
+    int aux = 1;
+    while(configReader.hasNextLine()){
+      if(aux == myConfigLine){
+        myStats = configReader.nextLine();
+      }
+      else{
+        neighbours.add(configReader.nextLine());
+      }
+      aux++;
+    }
+    
+    boolean kingOfTheHill = callElection();
+    if(kingOfTheHill){
+      // codigo de coordenador
+    }
+    else{
+      // codigo de membro usuario
+    }
+  }
+
+  // Metodo que performa uma eleicao
+  public static boolean callElection(){
+    return true;
+  }
+}
