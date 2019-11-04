@@ -18,9 +18,10 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Bully {
-  public static ArrayList<String> neighbours = new ArrayList<String>();
-  public static String myStats;
+  public static ArrayList<Stats> neighbours = new ArrayList<Stats>(); // lista de vizinhos
+  public static Stats myStats; // meus dados de configuracao
   public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt");
+  public static ArrayList<Stats> entryQueue = new ArrayList<Stats>(); // fila de entrada na regiao critica
 
   public static void main(String args[]) throws FileNotFoundException {
     File configFile = new File(args[0]);
@@ -28,17 +29,33 @@ public class Bully {
 
     int myConfigLine = Integer.parseInt(args[1]);
     int aux = 1;
+    int biggestId = 0;
     while(configReader.hasNextLine()){
+
+      String helper = configReader.nextLine();
+      String[] array = helper.split(" ");
+      int id = Integer.parseInt(array[0]);
+      String ip = array[1];
+      int port = Integer.parseInt(array[2]);
+
+      if(id > biggestId){
+        biggestId = id;
+      }
       if(aux == myConfigLine){
-        myStats = configReader.nextLine();
+        myStats = new Stats(id,ip,port);
       }
       else{
-        neighbours.add(configReader.nextLine());
+        neighbours.add(new Stats(id,ip,port));
       }
       aux++;
     }
     
-    callElection();
+    if(myStats.idNumber == biggestId){ // na inicializacao do sistema o membro com id maior e o primeiro coord
+      groupCoord();
+    }
+    else{
+      groupMember();
+    }
   }
 
   // Metodo que performa uma eleicao
@@ -46,8 +63,14 @@ public class Bully {
     
     boolean kingOfTheHill = true;
     for(int i = 0; i < neighbours.size(); i++ ){
-      // enviar mensagens aos vizinhos
-      
+      /**
+        • Processo P convoca uma eleição:
+        • P envia msg de eleição para todos os processos com IDs maiores que o dele
+        • Se ninguém responde, P vence eleição e torna-se coordenador
+        • Se algum processo com ID maior responde, ele desiste
+        • Quando processo recebe msg de eleição de membros com ID mais baixa
+        • Envia OK para remetente para indicar que está vivo e convoca eleição
+      */
     }
 
     if(kingOfTheHill){ // ganhou eleicao
@@ -60,11 +83,11 @@ public class Bully {
 
   // Metodo que performa a logica de um membro nao coordenador
   public static void groupMember(){
-
+    // primeiro de tudo precisamos pedir ao coord que mande um ACK para sabermos que ele ja existe
   }
 
   // Metodo que performa a logica de um membro coordenador
   public static void groupCoord(){
-
+    // implementar um servidor aqui
   }
 }
