@@ -12,12 +12,16 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.FileReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Bully {
   public static ArrayList<String> neighbours = new ArrayList<String>();
   public static String myStats;
+  public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt");
+
   public static void main(String args[]) throws FileNotFoundException {
     File configFile = new File(args[0]);
     Scanner configReader = new Scanner(configFile);
@@ -34,17 +38,33 @@ public class Bully {
       aux++;
     }
     
-    boolean kingOfTheHill = callElection();
-    if(kingOfTheHill){
-      // codigo de coordenador
-    }
-    else{
-      // codigo de membro usuario
-    }
+    callElection();
   }
 
   // Metodo que performa uma eleicao
-  public static boolean callElection(){
-    return true;
+  public static void callElection(){
+    
+    boolean kingOfTheHill = true;
+    for(int i = 0; i < neighbours.size(); i++ ){
+      // enviar mensagens aos vizinhos
+      
+    }
+
+    if(kingOfTheHill){ // ganhou eleicao
+      groupCoord();
+    }
+    else{ // perdeu eleicao
+      groupMember();
+    }
+  }
+
+  // Metodo que performa a logica de um membro nao coordenador
+  public static void groupMember(){
+
+  }
+
+  // Metodo que performa a logica de um membro coordenador
+  public static void groupCoord(){
+
   }
 }
