@@ -1,3 +1,4 @@
+
 /**
  *  O nodo com o maior ID é o coordenador inicial, e será responsável por manter o estado de
  *  acesso aos semáforos. Os outros nodos enviam mensagens ao coordenador sempre que
@@ -13,6 +14,9 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.io.FileReader;
 import java.util.Scanner;
 import java.util.ArrayList;
@@ -22,6 +26,8 @@ public class Bully {
   public static Stats myStats; // meus dados de configuracao
   public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt");
   public static ArrayList<Stats> entryQueue = new ArrayList<Stats>(); // fila de entrada na regiao critica
+  public static boolean locked = true; // file lock variable
+  public static Stats lockOwner = null; // current owner of the lock
 
   public static void main(String args[]) throws FileNotFoundException {
     File configFile = new File(args[0]);
@@ -88,6 +94,57 @@ public class Bully {
 
   // Metodo que performa a logica de um membro coordenador
   public static void groupCoord(){
-    // implementar um servidor aqui
+
+    try{
+      DatagramSocket serverSocket = new DatagramSocket(myStats.portNumber,InetAddress.getByName(myStats.ipAddress));
+      DatagramSocket clientSocket = new DatagramSocket();
+      byte[] receiveData = new byte[1024];
+      byte[] sendData = new byte[1024];
+
+      while(true){
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        serverSocket.receive(receivePacket);
+        
+        String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+        String array[] = sentence.split("-");
+        String request = array[0];
+        int requesterId = Integer.parseInt(array[1]);
+        String requesterIp = array[2];
+        int requesterPort = Integer.parseInt(array[3]);
+        Stats newRequester = new Stats(requesterId,requesterIp,requesterPort);
+        // acho que segundo o algoritmo eu deveria mandar uma mensagem de ACK aqui para o requisitor
+
+        if(request.equals("ENTER")){ // se o pedido for de entrada na area critica
+          if(entryQueue.size() > 0 || (locked == true)){ // e a fila nao esta vazia ou o arquivo trancado
+            entryQueue.add(newRequester); // entra na fila
+            // enviar mensagem avisando que ele entrou na fila
+            //String message = "";
+            //sendData = message.getBytes();
+            
+            //DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(destination_ip), destination_port);
+            //clientSocket.send(sendPacket);
+          }
+          else{ // senao
+            locked = true; // ganha o acesso a area critica
+            lockOwner = newRequester;
+            // enviar mensagem avisando que ele ganhou acesso
+          }
+        }
+        else if(request.equals("LEAVE")){ // se o pedido for de saida da area critica
+          if(lockOwner.idNumber == newRequester.idNumber){ // e ele for o dono atual do acesso ao arquivo
+            locked = false; // libero o arquivo
+            lockOwner = null; // removo o dono do acesso ao arquivo
+            // envio mensagem avisando que liberei a tranca conforme ele pediu
+          }
+          else{
+            // envio mensagem avisando que ele nao e o dono do acesso ao arquivo e algo esta errado
+          }
+        }
+      }
+      
+    }
+    catch(Exception exception){
+      System.out.println("Excecao no coord: "+exception.getStackTrace());
+    }
   }
 }
