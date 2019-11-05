@@ -47,7 +47,7 @@ public class Bully {
       groupCoord();
     }
     else{
-      groupMember();
+      groupMember(biggestId);
     }
   }
 
@@ -70,7 +70,7 @@ public class Bully {
       groupCoord();
     }
     else{ // perdeu eleicao
-      groupMember();
+      //groupMember();
     }
   }
 
@@ -85,8 +85,24 @@ public class Bully {
  */
 
   // Metodo que performa a logica de um membro nao coordenador
-  public static void groupMember(){
+  public static void groupMember(int coordId){
+    DatagramSocket serverSocket = new DatagramSocket(myStats.portNumber,InetAddress.getByName(myStats.ipAddress));
+    DatagramSocket clientSocket = new DatagramSocket();
+    byte[] receiveData = new byte[1024];
+    byte[] sendData = new byte[1024];
     // primeiro de tudo precisamos pedir ao coord que mande um ACK para sabermos que ele ja existe
+    String message = "ACK-"+myStats.idNumber+"-"+myStats.ipAddress+"-"+myStats.portNumber;
+    sendData = message.getBytes();
+    Stats myCoord = neighbours.get(coordId); // meu primeiro coord é o cara com id maior
+
+    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(), requesterPort);
+    clientSocket.send(sendPacket);
+    // agora preciso receber a mensagem de retorno
+    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+    serverSocket.receive(receivePacket);
+    
+    String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+    String array[] = sentence.split("-");
   }
 
   // Metodo que performa a logica de um membro coordenador
@@ -162,6 +178,7 @@ public class Bully {
               
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
             clientSocket.send(sendPacket);
+            throw new Exception("Alguem que nao era o dono do lock pediu para fazer LEAVE");
           }
         }
         else if(request.equals("ACK")){ // se o pedido for de apenas um ACK do coord
