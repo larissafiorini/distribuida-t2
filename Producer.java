@@ -1,12 +1,6 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.io.FileReader;
-import java.util.Scanner;
-import java.util.ArrayList;
 
 public class Producer{
 
@@ -20,25 +14,23 @@ public class Producer{
     *  no ambiente para que o mecanismo funcione.
     */
 
-    // Metodo que performa a logica de um membro nao coordenador
+    // Metodo que performa a logica de um produtor
     public static void execute(int coordId){
-        DatagramSocket serverSocket = new DatagramSocket(myStats.portNumber,InetAddress.getByName(myStats.ipAddress));
-        DatagramSocket clientSocket = new DatagramSocket();
-        byte[] receiveData = new byte[1024];
-        byte[] sendData = new byte[1024];
-        // primeiro de tudo precisamos pedir ao coord que mande um ACK para sabermos que ele ja existe
-        String message = "ACK-"+myStats.idNumber+"-"+myStats.ipAddress+"-"+myStats.portNumber;
-        sendData = message.getBytes();
-        Stats myCoord = neighbours.get(coordId); // meu primeiro coord é o cara com id maior
 
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(), requesterPort);
-        clientSocket.send(sendPacket);
-        // agora preciso receber a mensagem de retorno
-        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-        serverSocket.receive(receivePacket);
-        
-        String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-        String array[] = sentence.split("-");
-        
+        try{
+            DatagramSocket serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
+            DatagramSocket clientSocket = new DatagramSocket();
+            byte[] receiveData = new byte[1024];
+            byte[] sendData = new byte[1024];
+
+            Stats myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
+
+            while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
+                // TODO
+            }
+        }
+        catch(Exception exception){
+
+        }
     }
 }

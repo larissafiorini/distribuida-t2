@@ -10,15 +10,17 @@ import java.util.ArrayList;
 
 public class GroupCoord{
 
-    public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt");
-    public static boolean locked = true;  
-    public static Stats lockOwner = null; 
+    public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt"); // regiao critica
+    public static boolean productionLocked = false; // producao trancada ou nao
+    public static boolean consumptionLocked = true; // consumo trancado ou nao
+    public static boolean locked = false;   // arquivo com dono ou nao
+    public static Stats lockOwner = null; // dono atual do acesso ao arquivo 
 
     // Metodo que performa a logica de um membro coordenador
     public static void execute(){
 
         try{
-            DatagramSocket serverSocket = new DatagramSocket(myStats.portNumber,InetAddress.getByName(myStats.ipAddress));
+            DatagramSocket serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
             DatagramSocket clientSocket = new DatagramSocket();
             byte[] receiveData = new byte[1024];
             byte[] sendData = new byte[1024];
@@ -71,6 +73,14 @@ public class GroupCoord{
                         
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
                     clientSocket.send(sendPacket);
+                }
+                else if(request.equals("PRODUCE")){ // se o pedido for para produzir no arquivo da area critica
+                    // TODO
+                    // escreve mais um X no arquivo
+                }
+                else if(request.equals("CONSUME")){ // se o pedido for para consumir no arquivo da area critica
+                    // TODO
+                    // apaga um X do arquivo
                 }
                 else if(request.equals("ELECTION")){ // se o pedido for de uma nova eleicao
                     // TODO
