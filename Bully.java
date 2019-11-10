@@ -8,6 +8,8 @@ public class Bully {
   public static Stats myStats; // meus dados de configuracao
 
   public static void main(String args[]) throws FileNotFoundException {
+
+    // carregando e processando o arquivo de config
     File configFile = new File(args[0]);
     Scanner configReader = new Scanner(configFile);
 
