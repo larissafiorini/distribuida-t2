@@ -134,7 +134,7 @@ public class GroupCoord{
                     // comparo nossos ids e envio uma resposta?
                 }
                 else{ // se eu receber uma mensagem que nao reconheço 
-                    throw new Exception("Mensagem Invalida Recebida"); // lanco uma nova excessao
+                    throw new Exception("Mensagem Invalida Recebida: "+request); // lanco uma nova excessao
                 }
             }
         }

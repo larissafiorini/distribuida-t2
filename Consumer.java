@@ -24,13 +24,40 @@ public class Consumer{
             byte[] sendData = new byte[1024];
 
             Stats myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
+            long lastPing = System.currentTimeMillis();
+            while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
+                long now = System.currentTimeMillis();
 
-            while(true){ // fico enviando pedidos de acesso e consumo de tempos em tempos
-                // TODO
+                if(((now - lastPing)/1000) >= 10){ // a cada dez segundos eu tento entrar
+                    lastPing = System.currentTimeMillis();
+                    String message = "ENTER-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    sendData = message.getBytes();
+
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    String array[] = sentence.split("-");
+                    String command = array[0];
+                    String value = array[1];
+
+                    if(command.equals("STATUS")){
+                        if(value.equals("HASACCESS")){ // ganhei acesso, agora devo pedir para produzir e entao sair
+                            
+                        } 
+                    }
+                    else{ // se eu receber uma mensagem que nao reconheço 
+                        throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
+                    }
+                }
             }
         }
         catch(Exception exception){
-
+            System.out.println("Excecao no groupMember: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
         }
     }
 }
