@@ -46,7 +46,34 @@ public class Producer{
 
                     if(command.equals("STATUS")){
                         if(value.equals("HASACCESS")){ // ganhei acesso, agora devo pedir para produzir e entao sair
+                            message = "PRODUCE-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                            sendData = message.getBytes();
+
+                            sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                            clientSocket.send(sendPacket);
+                            // agora preciso receber a mensagem de retorno
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                            serverSocket.receive(receivePacket);
                             
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+
+                            // produzi, agora saio
+                            message = "LEAVE-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                            sendData = message.getBytes();
+
+                            sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                            clientSocket.send(sendPacket);
+                            // agora preciso receber a mensagem de retorno
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
                         } 
                     }
                     else{ // se eu receber uma mensagem que nao reconheço 
@@ -56,7 +83,7 @@ public class Producer{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no groupMember: "+exception.getMessage());
+            System.out.println("Excecao no producer: "+exception.getMessage());
             System.out.println(exception.getStackTrace());
         }
     }
