@@ -34,6 +34,8 @@ public class GroupMember{
 
                 if(command.equals("ACK")){ // coord esta vivo, posso prosseguir
                     if(role.equals("CONSUMER")){ // serei consumidor
+                        serverSocket.close();
+                        clientSocket.close();
                         Consumer.execute(coordId);
                     }
                     else{ // serei produtor

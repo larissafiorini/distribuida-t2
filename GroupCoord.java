@@ -8,8 +8,6 @@ import java.net.InetAddress;
 public class GroupCoord{
 
     public static File criticalRegionFile = new File("/regiao-critica/arquivo.txt"); // regiao critica
-    public static boolean productionLocked = false; // producao trancada ou nao
-    public static boolean consumptionLocked = true; // consumo trancado ou nao
     public static boolean locked = false;   // arquivo com dono ou nao
     public static Stats lockOwner = null; // dono atual do acesso ao arquivo 
     public static int numProducers = 0; // numero atual de produtores
@@ -72,9 +70,11 @@ public class GroupCoord{
                     String message = "ACK"; // envio um ACK para o requisitor falando sua funcao no sistema
                     if(numProducers > numConsumers){
                         message += "-CONSUMER";
+                        numConsumers+=1;
                     }
                     else{
                         message += "-PRODUCER";
+                        numProducers+=1;
                     }
                     sendData = message.getBytes();
                         
