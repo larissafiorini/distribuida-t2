@@ -3,6 +3,13 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+/**
+ * Codigo implementado baseado na definicao do problema de produtores e consumidores 
+ * disponivel em: http://www.ic.unicamp.br/~islene/mc514/prod-cons/prod-cons.pdf
+ * 
+ * @author Igor Sgorla Brehm, Larissa Fiorini e Rodrigo Mello
+ */
+
 public class Bully {
   public static ArrayList<Stats> neighbours = new ArrayList<Stats>(); // lista de vizinhos
   public static Stats myStats; // meus dados de configuracao

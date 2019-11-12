@@ -2,6 +2,13 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+/**
+ * Codigo implementado baseado na definicao do problema de produtores e consumidores 
+ * disponivel em: http://www.ic.unicamp.br/~islene/mc514/prod-cons/prod-cons.pdf
+ * 
+ * @author Igor Sgorla Brehm, Larissa Fiorini e Rodrigo Mello
+ */
+
 public class GroupMember{
 
     // Metodo que performa a logica de um membro nao coordenador

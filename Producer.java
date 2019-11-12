@@ -2,22 +2,19 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class Producer{
+/**
+ * Codigo implementado baseado na definicao do problema de produtores e consumidores 
+ * disponivel em: http://www.ic.unicamp.br/~islene/mc514/prod-cons/prod-cons.pdf
+ * 
+ * @author Igor Sgorla Brehm, Larissa Fiorini e Rodrigo Mello
+ */
 
-    /**
-    *  Se o coordenador não confirmar (a confirmação de
-    *  recebimento deve ser feita mesmo quando negada a entrada na região crítica), então o deve-se
-    *  iniciar uma eleição, de acordo com o algoritmo do valentão. Quando um novo coordenador for
-    *  selecionado, os nodos devem começar a enviar as solicitações de entrada e saída de região
-    *  crítica para o mesmo. É importante que o mecanismo seja validado eliminando-se o
-    *  coordenador em algum momento. O coordenador deve ser o primeiro processo a ser carregado
-    *  no ambiente para que o mecanismo funcione.
-    */
+public class Producer{
 
     // Metodo que performa a logica de um produtor
     public static void execute(int coordId){
 
-        try{
+        try{ // TODO CODIGO ESTA QUEBRADO DAQUI EM DIANTE!!!!!!!!!!
             DatagramSocket serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
             DatagramSocket clientSocket = new DatagramSocket();
             byte[] receiveData = new byte[1024];
