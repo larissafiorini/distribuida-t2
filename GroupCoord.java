@@ -14,7 +14,9 @@ public class GroupCoord{
     private static int mutex = 1;
     private static ArrayList<Stats> filaMutex = new ArrayList<Stats>();
     private static int vazio = 10;
+    private static ArrayList<Stats> filaVazio = new ArrayList<Stats>();
     private static int cheio = 0;
+    private static ArrayList<Stats> filaCheio = new ArrayList<Stats>();
     private static int numProducers = 0; // numero atual de produtores
     private static int numConsumers = 0; // numero atual de consumidores
     private static String currentBuffer = ""; // regiao critica
@@ -97,11 +99,11 @@ public class GroupCoord{
                 }
 
                 else if(request.equals("PRODUCE")){
-
+                    currentBuffer += "X";
                 }
 
                 else if(request.equals("CONSUME")){
-
+                    currentBuffer = currentBuffer.substring(1);
                 }
 
                 else if(request.equals("ACK")){ // se o pedido for de apenas um ACK do coord
@@ -139,21 +141,12 @@ public class GroupCoord{
     // Sequestra um recurso do semaforo
     private static void P(int numSemaforo, Stats requester){
 
-        /**
-        *   Produtor:                           Consumidor:
-            while (true)                        while (true)
-                decrementa(vazio);                  decrementa(cheio);
-                decrementa(mutex);                  decrementa(mutex);
-                escreveX()                          apagaX();
-                incrementa(mutex);                  incrementa(mutex);
-                incrementa(cheio);                  incrementa(vazio);
-        */
-
         try{
             switch(numSemaforo){
                 case 1: // PVAZIO
-                    /*
-                    if(mutex == true){ // e o arquivo esta trancado
+        
+                    if(vazio == 0){
+                        filaVazio.add(requester);
                         // enviar mensagem avisando que ele nao ganhou acesso
                         String message = "STATUS-ONQUEUE";
                         dataArray = message.getBytes();
@@ -161,9 +154,8 @@ public class GroupCoord{
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    else{ // e o arquivo nao esta trancado
-                        mutex = true; // ganha o acesso a area critica
-                        mutexOwner = requester;
+                    else{ 
+                        vazio -= 1;
                         // enviar mensagem avisando que ele ganhou acesso
                         String message = "STATUS-HASACCESS";
                         dataArray = message.getBytes();
@@ -171,59 +163,48 @@ public class GroupCoord{
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    */
+                    
                     break;
                 case 2: // PCHEIO
-                    /*
-                    if(currentBuffer.length() < 10){ // tamanho maximo de produtos sobrando e 10
-                        // escreve mais um X no arquivo
-                        FileWriter fileWriter = new FileWriter(criticalRegionFile);
-                        PrintWriter printWriter = new PrintWriter(fileWriter);
-                        currentBuffer += "X";
-                        printWriter.print(currentBuffer);
-                        printWriter.close();
-                        // envio mensagem avisando que foi produzido um novo X
-                        String message = "STATUS-PRODUCED";
+                    if(cheio == 0){
+                        filaCheio.add(requester);
+                        // enviar mensagem avisando que ele nao ganhou acesso
+                        String message = "STATUS-ONQUEUE";
                         dataArray = message.getBytes();
-                            
+                        
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    else{ // ja existem 10 produtos sobrando
-                        // envio mensagem avisando que nao foi produzido um novo X
-                        String message = "STATUS-FULL";
+                    else{ 
+                        cheio -= 1;
+                        // enviar mensagem avisando que ele ganhou acesso
+                        String message = "STATUS-HASACCESS";
                         dataArray = message.getBytes();
-                            
+                        
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    */
                     break;
                 case 3: // PMUTEX
-                    /*
-                    if(currentBuffer.length() > 0){ // tamanho minimo de produtos e 0
-                        // consome um X do arquivo
-                        FileWriter fileWriter = new FileWriter(criticalRegionFile);
-                        PrintWriter printWriter = new PrintWriter(fileWriter);
-                        currentBuffer = currentBuffer.substring(1);
-                        printWriter.print(currentBuffer);
-                        printWriter.close();
-                        // envio mensagem avisando que foi consumido um novo X
-                        String message = "STATUS-CONSUMED";
+                    if(mutex == 0){
+                        filaMutex.add(requester);
+                        // enviar mensagem avisando que ele nao ganhou acesso
+                        String message = "STATUS-ONQUEUE";
                         dataArray = message.getBytes();
-                            
+                        
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    else{ // nao existem produtos sobrando
-                        // envio mensagem avisando que nao foi consumido um novo X
-                        String message = "STATUS-EMPTY";
+                    else{ 
+                        mutex -= 1;
+                        // enviar mensagem avisando que ele ganhou acesso
+                        String message = "STATUS-HASACCESS";
                         dataArray = message.getBytes();
-                            
+                        
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    */
+                    break;
                 default:
                     break;
             }
@@ -236,33 +217,22 @@ public class GroupCoord{
 
     // Libera um recurso do semaforo
     private static void V(int numSemaforo, Stats requester){
-        /**
-        *   Produtor:                           Consumidor:
-            while (true)                        while (true)
-                decrementa(vazio);                  decrementa(cheio);
-                decrementa(mutex);                  decrementa(mutex);
-                escreveX()                          apagaX();
-                incrementa(mutex);                  incrementa(mutex);
-                incrementa(cheio);                  incrementa(vazio);
-        */
 
         try{ 
             switch(numSemaforo){
                 case 1: // VVAZIO
-                /*
-                    if(filaMutex.size() > 0){ // fila nao vazia
-                        mutexOwner = filaMutex.get(0);
+                    if(filaVazio.size() > 0){ // fila nao vazia
+                        Stats vazioOwner = filaVazio.get(0);
                         // envio mensagem avisando o novo dono do mutex
                         String message = "STATUS-HASACCESS";
                         dataArray = message.getBytes();
                             
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(mutexOwner.ipAddress), mutexOwner.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(vazioOwner.ipAddress), vazioOwner.portNumber);
                         clientSocket.send(sendPacket);
-                        filaMutex.remove(0);
+                        filaVazio.remove(0);
                     }
                     else{ // fila vazia
-                        mutex = false; // libero o arquivo
-                        mutexOwner = null; // removo o dono do acesso ao arquivo
+                        cheio += 1;
                     }
                     // envio mensagem avisando que liberei a tranca conforme ele pediu
                     String message = "STATUS-LOSTACCESS";
@@ -270,13 +240,49 @@ public class GroupCoord{
                         
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                     clientSocket.send(sendPacket);
-                    */
                     break;
                 case 2: //VCHEIO
 
+                    if(filaCheio.size() > 0){ // fila nao vazia
+                        Stats cheioOwner = filaCheio.get(0);
+                        // envio mensagem avisando o novo dono do mutex
+                        message = "STATUS-HASACCESS";
+                        dataArray = message.getBytes();
+                            
+                        sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(cheioOwner.ipAddress), cheioOwner.portNumber);
+                        clientSocket.send(sendPacket);
+                        filaCheio.remove(0);
+                    }
+                    else{ // fila vazia
+                        cheio += 1;
+                    }
+                    // envio mensagem avisando que liberei a tranca conforme ele pediu
+                    message = "STATUS-LOSTACCESS";
+                    dataArray = message.getBytes();
+                        
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                    clientSocket.send(sendPacket);
                     break;
                 case 3: //VMUTEX
-
+                    if(filaMutex.size() > 0){ // fila nao vazia
+                        Stats mutexOwner = filaMutex.get(0);
+                        // envio mensagem avisando o novo dono do mutex
+                        message = "STATUS-HASACCESS";
+                        dataArray = message.getBytes();
+                            
+                        sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(mutexOwner.ipAddress), mutexOwner.portNumber);
+                        clientSocket.send(sendPacket);
+                        filaMutex.remove(0);
+                    }
+                    else{ // fila vazia
+                        mutex += 1;
+                    }
+                    // envio mensagem avisando que liberei a tranca conforme ele pediu
+                    message = "STATUS-LOSTACCESS";
+                    dataArray = message.getBytes();
+                        
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                    clientSocket.send(sendPacket);
                     break;
                 default:
                     break;
