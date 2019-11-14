@@ -27,12 +27,12 @@ public class Consumer{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao no consumer: "+exception.getMessage());
             System.out.println(exception.getStackTrace());
         }
     }
 
-    // Metodo que performa a logica de um produtor
+    // Metodo que performa a logica de um consumidor
     public static void execute(int coordId){
         /*   
             Produtor:                           Consumidor:
@@ -62,7 +62,7 @@ public class Consumer{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao no consumer: "+exception.getMessage());
             System.out.println(exception.getStackTrace());
         }
     }
@@ -151,19 +151,43 @@ public class Consumer{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao no consumer: "+exception.getMessage());
             System.out.println(exception.getStackTrace());
         }
     }
 
     public static void V(int numSemaforo){
-        switch(numSemaforo){
-            case 2: // VMUTEX
-                break;
-            case 3: // VCHEIO
-                break;
-            default:
-                break;
+        try{
+            switch(numSemaforo){
+                case 1: // VVAZIO
+                    String message = "VVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                                        
+                    return;
+                case 2: // VMUTEX
+                    message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                                        
+                    return;
+                default:
+                    break;
+            }
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no consumer: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
         }
     }
 
@@ -176,7 +200,7 @@ public class Consumer{
             clientSocket.send(sendPacket);
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao no consumer: "+exception.getMessage());
             System.out.println(exception.getStackTrace());
         }
     }

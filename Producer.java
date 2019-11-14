@@ -157,13 +157,37 @@ public class Producer{
     }
 
     public static void V(int numSemaforo){
-        switch(numSemaforo){
-            case 2: // VMUTEX
-                break;
-            case 3: // VCHEIO
-                break;
-            default:
-                break;
+        try{
+            switch(numSemaforo){
+                case 2: // VMUTEX
+                    String message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                                        
+                    return;
+                case 3: // VCHEIO
+                    message = "VCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                                        
+                    return;
+                default:
+                    break;
+            }
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
         }
     }
 
