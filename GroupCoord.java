@@ -64,16 +64,6 @@ public class GroupCoord{
 
                 Stats newRequester = new Stats(requesterId,requesterIp,requesterPort);
 
-                /**
-                *   Produtor:                           Consumidor:
-                    while (true)                        while (true)
-                        decrementa(vazio);                  decrementa(cheio);
-                        decrementa(mutex);                  decrementa(mutex);
-                        escreveX()                          apagaX();
-                        incrementa(mutex);                  incrementa(mutex);
-                        incrementa(cheio);                  incrementa(vazio);
-                */
-
                 if(request.equals("PVAZIO")){
                     P(1,newRequester);
                 }
@@ -82,7 +72,7 @@ public class GroupCoord{
                     V(1,newRequester);
                 }
 
-                if(request.equals("PCHEIO")){
+                else if(request.equals("PCHEIO")){
                     P(2,newRequester);
                 }
 
@@ -90,7 +80,7 @@ public class GroupCoord{
                     V(2,newRequester);
                 }
 
-                if(request.equals("PMUTEX")){
+                else if(request.equals("PMUTEX")){
                     P(3,newRequester);
                 }
 
@@ -232,7 +222,7 @@ public class GroupCoord{
                         filaVazio.remove(0);
                     }
                     else{ // fila vazia
-                        cheio += 1;
+                        vazio += 1;
                     }
                     // envio mensagem avisando que liberei a tranca conforme ele pediu
                     String message = "STATUS-LOSTACCESS";
