@@ -87,14 +87,65 @@ public class Producer{
 
                     if(command.equals("STATUS")){
                         // se entrou apenas retorna
+                        if(value.equals("HASACCESS")){
+                            return;
+                        }
                         // se ficou na fila fica esperando ate receber mensagem que entrou
+                        while(true){
+                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+                            // se entrou apenas retorna
+                            if(value.equals("HASACCESS")){
+                                return;
+                            }
+                        }
                     }
                     else{ // se eu receber uma mensagem que nao reconheço 
                         throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
                     }
-                    break;
                 case 2: // PMUTEX
-                    break;
+                    message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    array = sentence.split("-");
+                    command = array[0];
+                    value = array[1];
+
+                    if(command.equals("STATUS")){
+                        // se entrou apenas retorna
+                        if(value.equals("HASACCESS")){
+                            return;
+                        }
+                        // se ficou na fila fica esperando ate receber mensagem que entrou
+                        while(true){
+                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+                            // se entrou apenas retorna
+                            if(value.equals("HASACCESS")){
+                                return;
+                            }
+                        }
+                    }
+                    else{ // se eu receber uma mensagem que nao reconheço 
+                        throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
+                    }
                 default:
                     break;
             }

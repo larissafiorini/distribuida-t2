@@ -71,10 +71,7 @@ public class Consumer{
         try{
             switch(numSemaforo){
                 case 2: // PMUTEX
-                    break;
-                case 3: // PCHEIO
-                    // TODO revisar este codigo antigo
-                    String message = "PCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    String message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
 
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
@@ -89,14 +86,66 @@ public class Consumer{
                     String value = array[1];
 
                     if(command.equals("STATUS")){
-                        
                         // se entrou apenas retorna
+                        if(value.equals("HASACCESS")){
+                            return;
+                        }
                         // se ficou na fila fica esperando ate receber mensagem que entrou
+                        while(true){
+                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+                            // se entrou apenas retorna
+                            if(value.equals("HASACCESS")){
+                                return;
+                            }
+                        }
+                    }
+                    else{ // se eu receber uma mensagem que nao reconheço 
+                        throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
+                    }   
+                case 3: // PCHEIO
+                    message = "PCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+
+                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    array = sentence.split("-");
+                    command = array[0];
+                    value = array[1];
+
+                    if(command.equals("STATUS")){
+                        // se entrou apenas retorna
+                        if(value.equals("HASACCESS")){
+                            return;
+                        }
+                        // se ficou na fila fica esperando ate receber mensagem que entrou
+                        while(true){
+                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+                            // se entrou apenas retorna
+                            if(value.equals("HASACCESS")){
+                                return;
+                            }
+                        }
                     }
                     else{ // se eu receber uma mensagem que nao reconheço 
                         throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
                     }
-                    break;
                 default:
                     break;
             }
