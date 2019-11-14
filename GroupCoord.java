@@ -1,6 +1,3 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -8,25 +5,19 @@ import java.util.ArrayList;
 
 /**
  * Codigo implementado baseado na definicao do problema de produtores e consumidores 
- * disponivel em: http://www.ic.unicamp.br/~islene/mc514/prod-cons/prod-cons.pdf
  * 
  * @author Igor Sgorla Brehm, Larissa Fiorini e Rodrigo Mello
  */
 
 public class GroupCoord{
 
-    private static int semaforoConsumer = 1;   
-    private static Stats semaforoConsumerOwner = null;
-    private static int semaforoProducer = 1;
-    private static Stats semaforoProducerOwner = null;
+    private static int mutex = 1;
     private static ArrayList<Stats> filaMutex = new ArrayList<Stats>();
+    private static int vazio = 10;
+    private static int cheio = 0;
     private static int numProducers = 0; // numero atual de produtores
     private static int numConsumers = 0; // numero atual de consumidores
     private static String currentBuffer = ""; // regiao critica
-    private static int vazio = 10;
-    private static ArrayList<Stats> filaProducers = new ArrayList<Stats>();
-    private static int cheio = 0;
-    private static ArrayList<Stats> filaConsumers = new ArrayList<Stats>();
     private static byte[] dataArray = new byte[1024];
     private static DatagramSocket serverSocket;
     private static DatagramSocket clientSocket;
@@ -63,23 +54,22 @@ public class GroupCoord{
                 
                 String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
                 String array[] = sentence.split("-");
+
                 String request = array[0];
                 int requesterId = Integer.parseInt(array[1]);
                 String requesterIp = array[2];
                 int requesterPort = Integer.parseInt(array[3]);
+
                 Stats newRequester = new Stats(requesterId,requesterIp,requesterPort);
 
                 /**
-                *   Produtor:                       Consumidor:
-                    while (true)                    while (true)
-                        item = produz();
-                        decrementa(vazio);              decrementa(cheio);
-                        decrementa(semaforoProducer);   decrementa(semaforoConsumer);
-                        f = (f + 1) % N;                i = (i + 1) % N;
-                        buffer[f] = item;               item = buffer[i];
-                        incrementa(semaforoProducer);   incrementa(semaforoConsumer);
-                        incrementa(cheio);              incrementa(vazio);
-                                                        consome(item);
+                *   Produtor:                           Consumidor:
+                    while (true)                        while (true)
+                        decrementa(vazio);                  decrementa(cheio);
+                        decrementa(mutex);                  decrementa(mutex);
+                        escreveX()                          apagaX();
+                        incrementa(mutex);                  incrementa(mutex);
+                        incrementa(cheio);                  incrementa(vazio);
                 */
 
                 if(request.equals("PVAZIO")){
@@ -98,20 +88,20 @@ public class GroupCoord{
                     V(2,newRequester);
                 }
 
-                if(request.equals("PPRODUCER")){
+                if(request.equals("PMUTEX")){
                     P(3,newRequester);
                 }
 
-                else if(request.equals("VPRODUCER")){
+                else if(request.equals("VMUTEX")){
                     V(3,newRequester);
                 }
 
-                if(request.equals("PCONSUMER")){
-                    P(4,newRequester);
+                else if(request.equals("PRODUCE")){
+
                 }
 
-                else if(request.equals("VCONSUMER")){
-                    V(4,newRequester);
+                else if(request.equals("CONSUME")){
+
                 }
 
                 else if(request.equals("ACK")){ // se o pedido for de apenas um ACK do coord
@@ -150,22 +140,19 @@ public class GroupCoord{
     private static void P(int numSemaforo, Stats requester){
 
         /**
-        *   Produtor:                       Consumidor:
-            while (true)                    while (true)
-                item = produz();
-                decrementa(vazio);              decrementa(cheio);
-                decrementa(semaforoProducer);   decrementa(semaforoConsumer);
-                f = (f + 1) % N;                i = (i + 1) % N;
-                buffer[f] = item;               item = buffer[i];
-                incrementa(semaforoProducer);   incrementa(semaforoConsumer);
-                incrementa(cheio);              incrementa(vazio);
-                                                consome(item);
+        *   Produtor:                           Consumidor:
+            while (true)                        while (true)
+                decrementa(vazio);                  decrementa(cheio);
+                decrementa(mutex);                  decrementa(mutex);
+                escreveX()                          apagaX();
+                incrementa(mutex);                  incrementa(mutex);
+                incrementa(cheio);                  incrementa(vazio);
         */
 
-        try{ // TODO CODIGO ESTA QUEBRADO DAQUI EM DIANTE!!!!!!!!!!
+        try{
             switch(numSemaforo){
-                case 1: // ENTER
-
+                case 1: // PVAZIO
+                    /*
                     if(mutex == true){ // e o arquivo esta trancado
                         // enviar mensagem avisando que ele nao ganhou acesso
                         String message = "STATUS-ONQUEUE";
@@ -184,9 +171,10 @@ public class GroupCoord{
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
+                    */
                     break;
-                case 2: // PRODUCE
-
+                case 2: // PCHEIO
+                    /*
                     if(currentBuffer.length() < 10){ // tamanho maximo de produtos sobrando e 10
                         // escreve mais um X no arquivo
                         FileWriter fileWriter = new FileWriter(criticalRegionFile);
@@ -209,9 +197,10 @@ public class GroupCoord{
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
+                    */
                     break;
-                case 3: // CONSUME
-
+                case 3: // PMUTEX
+                    /*
                     if(currentBuffer.length() > 0){ // tamanho minimo de produtos e 0
                         // consome um X do arquivo
                         FileWriter fileWriter = new FileWriter(criticalRegionFile);
@@ -234,7 +223,7 @@ public class GroupCoord{
                         DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
-                    break;
+                    */
                 default:
                     break;
             }
@@ -248,21 +237,19 @@ public class GroupCoord{
     // Libera um recurso do semaforo
     private static void V(int numSemaforo, Stats requester){
         /**
-        *   Produtor:                       Consumidor:
-            while (true)                    while (true)
-                item = produz();
-                decrementa(vazio);              decrementa(cheio);
-                decrementa(semaforoProducer);   decrementa(semaforoConsumer);
-                f = (f + 1) % N;                i = (i + 1) % N;
-                buffer[f] = item;               item = buffer[i];
-                incrementa(semaforoProducer);   incrementa(semaforoConsumer);
-                incrementa(cheio);              incrementa(vazio);
-                                                consome(item);
+        *   Produtor:                           Consumidor:
+            while (true)                        while (true)
+                decrementa(vazio);                  decrementa(cheio);
+                decrementa(mutex);                  decrementa(mutex);
+                escreveX()                          apagaX();
+                incrementa(mutex);                  incrementa(mutex);
+                incrementa(cheio);                  incrementa(vazio);
         */
 
-        try{ // TODO CODIGO ESTA QUEBRADO DAQUI EM DIANTE!!!!!!!!!!
+        try{ 
             switch(numSemaforo){
-                case 1:
+                case 1: // VVAZIO
+                /*
                     if(filaMutex.size() > 0){ // fila nao vazia
                         mutexOwner = filaMutex.get(0);
                         // envio mensagem avisando o novo dono do mutex
@@ -283,11 +270,12 @@ public class GroupCoord{
                         
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                     clientSocket.send(sendPacket);
+                    */
                     break;
-                case 2:
+                case 2: //VCHEIO
 
                     break;
-                case 3:
+                case 3: //VMUTEX
 
                     break;
                 default:
