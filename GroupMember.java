@@ -43,13 +43,14 @@ public class GroupMember{
                         serverSocket.close();
                         clientSocket.close();
                         Consumer.execute(coordId);
+                        return;
                     }
                     else{ // serei produtor
                         serverSocket.close();
                         clientSocket.close();
                         Producer.execute(coordId);
+                        return;
                     }
-                    break;
                 }
                 else{ // coord esta morto? Espero algum tempo e peço de novo
                     long lastPing = System.currentTimeMillis();

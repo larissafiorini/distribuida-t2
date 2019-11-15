@@ -130,6 +130,13 @@ public class GroupCoord{
                     }
                 }
 
+                else if(request.equals("NEWCOORD")){ // novo coordenador na area
+                    serverSocket.close();
+                    clientSocket.close();
+                    GroupMember.execute(requesterId);
+                    return;
+                }
+
                 else{ // se eu receber uma mensagem que nao reconheço 
                     throw new Exception("Mensagem Invalida Recebida: "+request); // lanco uma nova excessao
                 }
