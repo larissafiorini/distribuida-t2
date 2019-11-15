@@ -204,4 +204,49 @@ public class Producer{
             System.out.println(exception.getStackTrace());
         }
     }
+    
+    // Metodo que performa uma eleicao
+    public static void callElection(){
+        try{
+            for(int i = 0; i < Bully.neighbours.size(); i++ ){
+                if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
+                    
+                    String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+                    
+                    Stats candidate = Bully.neighbours.get(i);
+                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    String array[] = sentence.split("-");
+
+                    int idNumber = Integer.parseInt(array[1]);
+                    if(idNumber > Bully.myStats.idNumber){ // Se algum processo com ID maior responde, ele desiste
+                        return;
+                    }
+                }
+            }
+            //Se ninguém responde, P vence eleição e torna-se coordenador
+            //enviar mensagens a todos avisando sobre novo coord
+            for(int i = 0; i < Bully.neighbours.size(); i++ ){
+                    
+                String message = "NEWCOORD-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                dataArray = message.getBytes();
+                
+                Stats neighbour = Bully.neighbours.get(i);
+                DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
+                clientSocket.send(sendPacket);
+                    
+            }
+            GroupCoord.execute();
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
+        }
+    }
 }

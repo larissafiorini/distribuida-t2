@@ -113,8 +113,21 @@ public class GroupCoord{
                 }
 
                 else if(request.equals("ELECTION")){ // se o pedido for de uma nova eleicao
-                    // TODO
-                    // comparo nossos ids e envio uma resposta?
+                    
+                    // comparo nossos ids e envio uma resposta
+                    String message = "STATUS-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+                        
+                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requesterIp), requesterPort);
+                    clientSocket.send(sendPacket);
+
+                    if(requesterId < Bully.myStats.idNumber){
+                        /**
+                        • Quando processo recebe msg de eleição de membros com ID mais baixa
+                        • Envia OK para remetente para indicar que está vivo e convoca eleição
+                        */
+                        callElection();
+                    }
                 }
 
                 else{ // se eu receber uma mensagem que nao reconheço 
@@ -277,6 +290,39 @@ public class GroupCoord{
                 default:
                     break;
             }
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no coord: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
+        }
+    }
+
+    // Metodo que performa uma eleicao
+    public static void callElection(){
+        try{
+            for(int i = 0; i < Bully.neighbours.size(); i++ ){
+                if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
+                    
+                    String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    dataArray = message.getBytes();
+                    
+                    Stats candidate = Bully.neighbours.get(i);
+                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    String array[] = sentence.split("-");
+
+                    int idNumber = Integer.parseInt(array[1]);
+                    if(idNumber > Bully.myStats.idNumber){ // Se algum processo com ID maior responde, ele desiste
+                        return;
+                    }
+                }
+            }
+            //Se ninguém responde, P vence eleição e continua coordenador
         }
         catch(Exception exception){
             System.out.println("Excecao no coord: "+exception.getMessage());

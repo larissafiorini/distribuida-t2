@@ -49,27 +49,4 @@ public class Bully {
       GroupMember.execute(biggestId);
     }
   }
-
-  // Metodo que performa uma eleicao
-  public static void callElection(){
-    
-    boolean kingOfTheHill = true;
-    for(int i = 0; i < neighbours.size(); i++ ){
-      /**
-        • Processo P convoca uma eleição:
-        • P envia msg de eleição para todos os processos com IDs maiores que o dele
-        • Se ninguém responde, P vence eleição e torna-se coordenador
-        • Se algum processo com ID maior responde, ele desiste
-        • Quando processo recebe msg de eleição de membros com ID mais baixa
-        • Envia OK para remetente para indicar que está vivo e convoca eleição
-      */
-    }
-
-    if(kingOfTheHill){ // ganhou eleicao
-      
-    }
-    else{ // perdeu eleicao
-      
-    }
-  }
 }
