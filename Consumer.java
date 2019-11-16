@@ -46,12 +46,15 @@ public class Consumer{
         try{
             initSocket(1);
             initSocket(2);
-            myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
+            myCoord = Bully.neighbours.get(coordId-1); // meu primeiro coord é o cara com id maior
             long lastPing = System.currentTimeMillis();
             while(true){ // fico enviando pedidos de acesso e consumo de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 10){ // a cada dez segundos eu tento entrar
+                if(((now - lastPing)/1000) >= 2){ // a cada dois segundos eu tento entrar
+
+                    System.out.println("Tentando consumir...");
+
                     lastPing = System.currentTimeMillis();
                     P(3);
                     P(2);
@@ -74,6 +77,8 @@ public class Consumer{
                     String message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
 
+                    System.out.println("P(mutex)...");
+
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
@@ -88,10 +93,16 @@ public class Consumer{
                     if(command.equals("STATUS")){
                         // se entrou apenas retorna
                         if(value.equals("HASACCESS")){
+
+                            System.out.println("Entrei no semaforo...");
+
                             return;
                         }
                         // se ficou na fila fica esperando ate receber mensagem que entrou
                         while(true){
+
+                            System.out.println("Estou na fila...");
+
                             receivePacket = new DatagramPacket(dataArray, dataArray.length);
                             serverSocket.receive(receivePacket);
                             
@@ -101,6 +112,9 @@ public class Consumer{
                             value = array[1];
                             // se entrou apenas retorna
                             if(value.equals("HASACCESS")){
+
+                                System.out.println("Entrei no semaforo...");
+
                                 return;
                             }
                         }
@@ -111,6 +125,8 @@ public class Consumer{
                 case 3: // PCHEIO
                     message = "PCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
+
+                    System.out.println("P(cheio)...");
 
                     sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
@@ -126,10 +142,16 @@ public class Consumer{
                     if(command.equals("STATUS")){
                         // se entrou apenas retorna
                         if(value.equals("HASACCESS")){
+
+                            System.out.println("Entrei no semaforo...");
+
                             return;
                         }
                         // se ficou na fila fica esperando ate receber mensagem que entrou
                         while(true){
+
+                            System.out.println("Estou na fila...");
+
                             receivePacket = new DatagramPacket(dataArray, dataArray.length);
                             serverSocket.receive(receivePacket);
                             
@@ -139,6 +161,9 @@ public class Consumer{
                             value = array[1];
                             // se entrou apenas retorna
                             if(value.equals("HASACCESS")){
+
+                                System.out.println("Entrei no semaforo...");
+
                                 return;
                             }
                         }
@@ -163,6 +188,8 @@ public class Consumer{
                     String message = "VVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
 
+                    System.out.println("V(vazio)...");
+
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
@@ -171,6 +198,9 @@ public class Consumer{
                                         
                     return;
                 case 2: // VMUTEX
+
+                    System.out.println("V(mutex)...");
+
                     message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
 
@@ -195,6 +225,8 @@ public class Consumer{
         try{
             String message = "CONSUME-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
             dataArray = message.getBytes();
+
+            System.out.println("Consumindo...");
 
             DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
             clientSocket.send(sendPacket);

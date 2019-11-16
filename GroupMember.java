@@ -18,13 +18,14 @@ public class GroupMember{
         byte[] sendData = new byte[1024];
 
         try{
-             serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
-             clientSocket = new DatagramSocket();
+            serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
+            clientSocket = new DatagramSocket();
 
-        }catch(Exception exception){
-                System.out.println("Excecao ao criar Datagrama: "+exception.getMessage());
-                System.out.println(exception.getStackTrace());
-            }
+        }
+        catch(Exception exception){
+            System.out.println("Excecao ao criar Datagrama: "+exception.getMessage());
+            System.out.println(exception.getStackTrace());
+        }
 
         try{
             while(true){
@@ -34,7 +35,7 @@ public class GroupMember{
                 String message = "ACK-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                 
                 sendData = message.getBytes();
-                Stats myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
+                Stats myCoord = Bully.neighbours.get(coordId-1); // meu primeiro coord é o cara com id maior
 
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                 clientSocket.send(sendPacket);

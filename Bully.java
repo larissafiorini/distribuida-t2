@@ -48,7 +48,7 @@ public class Bully {
       GroupCoord.execute();
     }
     else{
-      GroupMember.execute(neighbours.size() - 1 );
+      GroupMember.execute(biggestId);
     }
   }
 }

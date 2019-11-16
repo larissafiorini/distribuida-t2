@@ -56,7 +56,8 @@ public class GroupCoord{
 
 
                 String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-                System.out.println(receivePacket.getLength());
+                
+                System.out.println("Mensagem recebida: "+sentence);
 
                 String array[] = sentence.split("-");
                 System.out.println(sentence);
@@ -108,14 +109,14 @@ public class GroupCoord{
                 }
 
                 else if(request.equals("CONSUME")){
-                    System.out.println("Pedido para comsumir");
+                    System.out.println("Pedido para consumir");
 
                     currentBuffer = currentBuffer.substring(1);
                 }
 
                 else if(request.equals("ACK")){ // se o pedido for de apenas um ACK do coord
                     String message = "ACK"; // envio um ACK para o requisitor falando sua funcao no sistema
-                    System.out.println("Novo nodo.");
+                    System.out.println("Novo membro detectado.");
 
                     if(numProducers > numConsumers){
                         System.out.println("Funcao atribuida CONSUMER.");
