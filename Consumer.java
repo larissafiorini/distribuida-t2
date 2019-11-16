@@ -10,7 +10,8 @@ import java.net.InetAddress;
 
 public class Consumer{
 
-    private static byte[] dataArray = new byte[1024];
+    private static byte[] receiveData = new byte[1024];
+    private static byte[] sendData = new byte[1024];
     private static DatagramSocket serverSocket;
     private static DatagramSocket clientSocket;
     private static Stats myCoord;
@@ -51,7 +52,7 @@ public class Consumer{
             while(true){ // fico enviando pedidos de acesso e consumo de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 2){ // a cada dois segundos eu tento entrar
+                if(((now - lastPing)/1000) >= 5){ // a cada cinco segundos eu tento entrar
 
                     System.out.println("Tentando consumir...");
 
@@ -75,14 +76,14 @@ public class Consumer{
             switch(numSemaforo){
                 case 2: // PMUTEX
                     String message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("P(mutex)...");
 
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -103,7 +104,7 @@ public class Consumer{
 
                             System.out.println("Estou na fila...");
 
-                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
                             serverSocket.receive(receivePacket);
                             
                             sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -124,14 +125,14 @@ public class Consumer{
                     }   
                 case 3: // PCHEIO
                     message = "PCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("P(cheio)...");
 
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -152,7 +153,7 @@ public class Consumer{
 
                             System.out.println("Estou na fila...");
 
-                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
                             serverSocket.receive(receivePacket);
                             
                             sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -186,14 +187,14 @@ public class Consumer{
             switch(numSemaforo){
                 case 1: // VVAZIO
                     String message = "VVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("V(vazio)...");
 
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                                         
                     return;
@@ -202,12 +203,12 @@ public class Consumer{
                     System.out.println("V(mutex)...");
 
                     message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                                         
                     return;
@@ -224,11 +225,11 @@ public class Consumer{
     public static void Consume(){
         try{
             String message = "CONSUME-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-            dataArray = message.getBytes();
+            sendData = message.getBytes();
 
             System.out.println("Consumindo...");
 
-            DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
             clientSocket.send(sendPacket);
         }
         catch(Exception exception){
@@ -244,13 +245,13 @@ public class Consumer{
                 if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
                     
                     String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                     
                     Stats candidate = Bully.neighbours.get(i);
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -267,10 +268,10 @@ public class Consumer{
             for(int i = 0; i < Bully.neighbours.size(); i++ ){
                     
                 String message = "NEWCOORD-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                dataArray = message.getBytes();
+                sendData = message.getBytes();
                 
                 Stats neighbour = Bully.neighbours.get(i);
-                DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
                 clientSocket.send(sendPacket);
                     
             }

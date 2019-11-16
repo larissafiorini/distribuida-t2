@@ -20,7 +20,8 @@ public class GroupCoord{
     private static int numProducers = 0; // numero atual de produtores
     private static int numConsumers = 0; // numero atual de consumidores
     private static String currentBuffer = ""; // regiao critica
-    private static byte[] dataArray = new byte[1024];
+    private static byte[] receiveData = new byte[1024];
+    private static byte[] sendData = new byte[1024];
     private static DatagramSocket serverSocket;
     private static DatagramSocket clientSocket;
 
@@ -51,7 +52,7 @@ public class GroupCoord{
             
             while(true){
 
-                DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
 
 
@@ -130,9 +131,9 @@ public class GroupCoord{
                         message += "-PRODUCER";
                         numProducers+=1;
                     }
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                         
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requesterIp), requesterPort);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
                     clientSocket.send(sendPacket);
                 }
 
@@ -140,9 +141,9 @@ public class GroupCoord{
                     
                     // comparo nossos ids e envio uma resposta
                     String message = "STATUS-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                         
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requesterIp), requesterPort);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
                     clientSocket.send(sendPacket);
 
                     if(requesterId < Bully.myStats.idNumber){
@@ -183,18 +184,18 @@ public class GroupCoord{
                         filaVazio.add(requester);
                         // enviar mensagem avisando que ele nao ganhou acesso
                         String message = "STATUS-ONQUEUE";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     else{ 
                         vazio -= 1;
                         // enviar mensagem avisando que ele ganhou acesso
                         String message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     
@@ -204,18 +205,18 @@ public class GroupCoord{
                         filaCheio.add(requester);
                         // enviar mensagem avisando que ele nao ganhou acesso
                         String message = "STATUS-ONQUEUE";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     else{ 
                         cheio -= 1;
                         // enviar mensagem avisando que ele ganhou acesso
                         String message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     break;
@@ -224,18 +225,18 @@ public class GroupCoord{
                         filaMutex.add(requester);
                         // enviar mensagem avisando que ele nao ganhou acesso
                         String message = "STATUS-ONQUEUE";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     else{ 
                         mutex -= 1;
                         // enviar mensagem avisando que ele ganhou acesso
                         String message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                         
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                         clientSocket.send(sendPacket);
                     }
                     break;
@@ -259,9 +260,9 @@ public class GroupCoord{
                         Stats vazioOwner = filaVazio.get(0);
                         // envio mensagem avisando o novo dono do mutex
                         String message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                             
-                        DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(vazioOwner.ipAddress), vazioOwner.portNumber);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(vazioOwner.ipAddress), vazioOwner.portNumber);
                         clientSocket.send(sendPacket);
                         filaVazio.remove(0);
                     }
@@ -270,9 +271,9 @@ public class GroupCoord{
                     }
                     // envio mensagem avisando que liberei a tranca conforme ele pediu
                     String message = "STATUS-LOSTACCESS";
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                         
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                     clientSocket.send(sendPacket);
                     break;
                 case 2: //VCHEIO
@@ -281,9 +282,9 @@ public class GroupCoord{
                         Stats cheioOwner = filaCheio.get(0);
                         // envio mensagem avisando o novo dono do mutex
                         message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                             
-                        sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(cheioOwner.ipAddress), cheioOwner.portNumber);
+                        sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(cheioOwner.ipAddress), cheioOwner.portNumber);
                         clientSocket.send(sendPacket);
                         filaCheio.remove(0);
                     }
@@ -292,9 +293,9 @@ public class GroupCoord{
                     }
                     // envio mensagem avisando que liberei a tranca conforme ele pediu
                     message = "STATUS-LOSTACCESS";
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                         
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                     clientSocket.send(sendPacket);
                     break;
                 case 3: //VMUTEX
@@ -302,9 +303,9 @@ public class GroupCoord{
                         Stats mutexOwner = filaMutex.get(0);
                         // envio mensagem avisando o novo dono do mutex
                         message = "STATUS-HASACCESS";
-                        dataArray = message.getBytes();
+                        sendData = message.getBytes();
                             
-                        sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(mutexOwner.ipAddress), mutexOwner.portNumber);
+                        sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(mutexOwner.ipAddress), mutexOwner.portNumber);
                         clientSocket.send(sendPacket);
                         filaMutex.remove(0);
                     }
@@ -313,9 +314,9 @@ public class GroupCoord{
                     }
                     // envio mensagem avisando que liberei a tranca conforme ele pediu
                     message = "STATUS-LOSTACCESS";
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                         
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requester.ipAddress), requester.portNumber);
                     clientSocket.send(sendPacket);
                     break;
                 default:
@@ -335,13 +336,13 @@ public class GroupCoord{
                 if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
                     
                     String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                     
                     Stats candidate = Bully.neighbours.get(i);
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());

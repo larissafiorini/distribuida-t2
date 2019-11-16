@@ -10,7 +10,8 @@ import java.net.InetAddress;
 
 public class Producer{
 
-    private static byte[] dataArray = new byte[1024];
+    private static byte[] receiveData = new byte[1024];
+    private static byte[] sendData = new byte[1024];
     private static DatagramSocket serverSocket;
     private static DatagramSocket clientSocket;
     private static Stats myCoord;
@@ -52,7 +53,7 @@ public class Producer{
             while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 2){ // a cada dois segundos eu tento entrar
+                if(((now - lastPing)/1000) >= 5){ // a cada cinco segundos eu tento entrar
 
                     System.out.println("Tentando produzir...");
 
@@ -79,13 +80,13 @@ public class Producer{
                     System.out.println("P(vazio)...");
 
                     String message = "PVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                     
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
 
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -106,7 +107,7 @@ public class Producer{
 
                             System.out.println("Estou na fila...");
 
-                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
                             serverSocket.receive(receivePacket);
                             
                             sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -127,14 +128,14 @@ public class Producer{
                     }
                 case 2: // PMUTEX
                     message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("P(mutex)...");
 
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -155,7 +156,7 @@ public class Producer{
 
                             System.out.println("Estou na fila...");
 
-                            receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
                             serverSocket.receive(receivePacket);
                             
                             sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -189,27 +190,27 @@ public class Producer{
             switch(numSemaforo){
                 case 2: // VMUTEX
                     String message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("V(mutex)...");
 
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                                         
                     return;
                 case 3: // VCHEIO
                     message = "VCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
 
                     System.out.println("V(cheio)...");
 
-                    sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                                         
                     return;
@@ -226,11 +227,11 @@ public class Producer{
     public static void Produce(){
         try{
             String message = "PRODUCE-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-            dataArray = message.getBytes();
+            sendData = message.getBytes();
 
             System.out.println("Produzindo...");
 
-            DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
             clientSocket.send(sendPacket);
         }
         catch(Exception exception){
@@ -246,13 +247,13 @@ public class Producer{
                 if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
                     
                     String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    dataArray = message.getBytes();
+                    sendData = message.getBytes();
                     
                     Stats candidate = Bully.neighbours.get(i);
-                    DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
+                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                     
                     String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
@@ -269,10 +270,10 @@ public class Producer{
             for(int i = 0; i < Bully.neighbours.size(); i++ ){
                     
                 String message = "NEWCOORD-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                dataArray = message.getBytes();
+                sendData = message.getBytes();
                 
                 Stats neighbour = Bully.neighbours.get(i);
-                DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
                 clientSocket.send(sendPacket);
                     
             }
