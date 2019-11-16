@@ -28,7 +28,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -46,7 +46,7 @@ public class Producer{
         try{
             initSocket(1);
             initSocket(2);
-            myCoord = Bully.neighbours.get(coordId-1); // meu primeiro coord é o cara com id maior
+            myCoord = Bully.neighbours.get(Bully.findMemberById(coordId)); // meu primeiro coord é o cara com id maior
             long lastPing = System.currentTimeMillis();
 
             while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
@@ -67,7 +67,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -75,7 +75,7 @@ public class Producer{
         try{
             switch(numSemaforo){
                 case 1: // PVAZIO
-                
+
                     System.out.println("P(vazio)...");
 
                     String message = "PVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
@@ -180,7 +180,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -219,7 +219,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -235,7 +235,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
     
@@ -280,7 +280,7 @@ public class Producer{
         }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 }

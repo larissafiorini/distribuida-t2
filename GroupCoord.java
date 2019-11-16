@@ -36,8 +36,8 @@ public class GroupCoord{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no coord: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 
@@ -167,8 +167,8 @@ public class GroupCoord{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception);
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no coord: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 
@@ -244,8 +244,8 @@ public class GroupCoord{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no coord: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 
@@ -323,8 +323,8 @@ public class GroupCoord{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no coord: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 
@@ -356,8 +356,8 @@ public class GroupCoord{
             //Se ninguém responde, P vence eleição e continua coordenador
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no coord: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 }

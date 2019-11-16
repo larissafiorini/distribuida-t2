@@ -28,7 +28,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -46,7 +46,7 @@ public class Consumer{
         try{
             initSocket(1);
             initSocket(2);
-            myCoord = Bully.neighbours.get(coordId-1); // meu primeiro coord é o cara com id maior
+            myCoord = Bully.neighbours.get(Bully.findMemberById(coordId)); // meu primeiro coord é o cara com id maior
             long lastPing = System.currentTimeMillis();
             while(true){ // fico enviando pedidos de acesso e consumo de tempos em tempos
                 long now = System.currentTimeMillis();
@@ -66,7 +66,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -177,7 +177,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -217,7 +217,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -233,7 +233,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 
@@ -278,7 +278,7 @@ public class Consumer{
         }
         catch(Exception exception){
             System.out.println("Excecao no consumer: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            exception.printStackTrace();
         }
     }
 }

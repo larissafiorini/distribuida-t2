@@ -51,4 +51,13 @@ public class Bully {
       GroupMember.execute(biggestId);
     }
   }
+
+  public static int findMemberById(int id){
+    for(int i = 0; i < neighbours.size(); i++){
+      if(neighbours.get(i).idNumber == id){
+        return i;
+      }
+    }
+    return -1;
+  }
 }

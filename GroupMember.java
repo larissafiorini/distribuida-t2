@@ -23,8 +23,8 @@ public class GroupMember{
 
         }
         catch(Exception exception){
-            System.out.println("Excecao ao criar Datagrama: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao ao criar Datagrama: "+exception.toString());
+            exception.printStackTrace();
         }
 
         try{
@@ -35,7 +35,7 @@ public class GroupMember{
                 String message = "ACK-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                 
                 sendData = message.getBytes();
-                Stats myCoord = Bully.neighbours.get(coordId-1); // meu primeiro coord é o cara com id maior
+                Stats myCoord = Bully.neighbours.get(Bully.findMemberById(coordId)); // meu primeiro coord é o cara com id maior
 
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                 clientSocket.send(sendPacket);
@@ -79,8 +79,8 @@ public class GroupMember{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no groupMember: "+exception.getMessage());
-            System.out.println(exception.getStackTrace());
+            System.out.println("Excecao no groupMember: "+exception.toString());
+            exception.printStackTrace();
         }
     }
 }
