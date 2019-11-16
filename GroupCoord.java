@@ -48,15 +48,18 @@ public class GroupCoord{
 
             initSocket(1);
             initSocket(2);
-
+            
             while(true){
 
                 DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
                 serverSocket.receive(receivePacket);
-                
-                String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-                String array[] = sentence.split("-");
 
+
+                String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                System.out.println(receivePacket.getLength());
+
+                String array[] = sentence.split("-");
+                System.out.println(sentence);
                 String request = array[0];
                 int requesterId = Integer.parseInt(array[1]);
                 String requesterIp = array[2];
@@ -65,44 +68,64 @@ public class GroupCoord{
                 Stats newRequester = new Stats(requesterId,requesterIp,requesterPort);
 
                 if(request.equals("PVAZIO")){
+                    System.out.println("PVAZIO");
                     P(1,newRequester);
                 }
 
                 else if(request.equals("VVAZIO")){
+                    System.out.println("VVAZIO");
+
                     V(1,newRequester);
                 }
 
                 else if(request.equals("PCHEIO")){
+                    System.out.println("PCHEIO");
+
                     P(2,newRequester);
                 }
 
                 else if(request.equals("VCHEIO")){
+                    System.out.println("VCHEIO");
+
                     V(2,newRequester);
                 }
 
                 else if(request.equals("PMUTEX")){
+                    System.out.println("PMUTEX");
+
                     P(3,newRequester);
                 }
 
                 else if(request.equals("VMUTEX")){
+                    System.out.println("VMUTEX");
+
                     V(3,newRequester);
                 }
 
                 else if(request.equals("PRODUCE")){
+                    System.out.println("Pedido para produzir");
                     currentBuffer += "X";
                 }
 
                 else if(request.equals("CONSUME")){
+                    System.out.println("Pedido para comsumir");
+
                     currentBuffer = currentBuffer.substring(1);
                 }
 
                 else if(request.equals("ACK")){ // se o pedido for de apenas um ACK do coord
                     String message = "ACK"; // envio um ACK para o requisitor falando sua funcao no sistema
+                    System.out.println("Novo nodo.");
+
                     if(numProducers > numConsumers){
+                        System.out.println("Funcao atribuida CONSUMER.");
+
                         message += "-CONSUMER";
                         numConsumers+=1;
                     }
                     else{
+                        System.out.println("Funcao atribuida PRODUCER.");
+
                         message += "-PRODUCER";
                         numProducers+=1;
                     }
@@ -143,7 +166,7 @@ public class GroupCoord{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no coord: "+exception.getMessage());
+            System.out.println("Excecao no coord: "+exception);
             System.out.println(exception.getStackTrace());
         }
     }

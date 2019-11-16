@@ -22,6 +22,7 @@ public class Bully {
     int myConfigLine = Integer.parseInt(args[1]);
     int aux = 1;
     int biggestId = 0;
+    System.out.println("Lendo arquivo de config '" + args[0] + "'.");
     while(configReader.hasNextLine()){
 
       String helper = configReader.nextLine();
@@ -43,10 +44,11 @@ public class Bully {
     }
     
     if(myStats.idNumber == biggestId){ // na inicializacao do sistema o membro com id maior e o primeiro coord
-      GroupCoord.execute();;
+      System.out.println("Sou coordenador");
+      GroupCoord.execute();
     }
     else{
-      GroupMember.execute(biggestId);
+      GroupMember.execute(neighbours.size() - 1 );
     }
   }
 }

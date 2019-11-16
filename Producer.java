@@ -48,10 +48,12 @@ public class Producer{
             initSocket(2);
             myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
             long lastPing = System.currentTimeMillis();
+
             while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 10){ // a cada dez segundos eu tento entrar
+                if(((now - lastPing)/1000) >= 2){ // a cada dez segundos eu tento entrar
+                    System.out.println("Tentando produzir...");
                     lastPing = System.currentTimeMillis();
                     P(1);
                     P(2);
@@ -73,9 +75,11 @@ public class Producer{
                 case 1: // PVAZIO
                     String message = "PVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
-
+                    
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
+                    System.out.println(dataArray.length);
+
                     // agora preciso receber a mensagem de retorno
                     DatagramPacket receivePacket = new DatagramPacket(dataArray, dataArray.length);
                     serverSocket.receive(receivePacket);
@@ -111,6 +115,7 @@ public class Producer{
                 case 2: // PMUTEX
                     message = "PMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
+                    System.out.println("PMUTEX");
 
                     sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
@@ -162,6 +167,7 @@ public class Producer{
                 case 2: // VMUTEX
                     String message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
+                    System.out.println("vMUTEX");
 
                     DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
@@ -173,6 +179,7 @@ public class Producer{
                 case 3: // VCHEIO
                     message = "VCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     dataArray = message.getBytes();
+                    System.out.println("VCHEIO");
 
                     sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
@@ -195,6 +202,7 @@ public class Producer{
         try{
             String message = "PRODUCE-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
             dataArray = message.getBytes();
+            System.out.println("PRODUCE");
 
             DatagramPacket sendPacket = new DatagramPacket(dataArray, dataArray.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
             clientSocket.send(sendPacket);

@@ -12,23 +12,33 @@ public class GroupMember{
 
     // Metodo que performa a logica de um membro nao coordenador
     public static void execute(int coordId){
+        DatagramSocket serverSocket = null;
+        DatagramSocket clientSocket = null;
+        byte[] receiveData = new byte[1024];
+        byte[] sendData = new byte[1024];
 
         try{
+             serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
+             clientSocket = new DatagramSocket();
 
-            DatagramSocket serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
-            DatagramSocket clientSocket = new DatagramSocket();
-            byte[] receiveData = new byte[1024];
-            byte[] sendData = new byte[1024];
+        }catch(Exception exception){
+                System.out.println("Excecao ao criar Datagrama: "+exception.getMessage());
+                System.out.println(exception.getStackTrace());
+            }
 
+        try{
             while(true){
 
+                System.out.println("Requisitando meu papel para coord...");
                 // primeiro de tudo precisamos pedir ao coord que mande um ACK para sabermos que ele ja existe
                 String message = "ACK-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                
                 sendData = message.getBytes();
                 Stats myCoord = Bully.neighbours.get(coordId); // meu primeiro coord é o cara com id maior
 
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                 clientSocket.send(sendPacket);
+
                 // agora preciso receber a mensagem de retorno
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 serverSocket.receive(receivePacket);
@@ -38,14 +48,16 @@ public class GroupMember{
                 String command = array[0];
                 String role = array[1];
 
-                if(command.equals("ACK")){ // coord esta vivo, posso prosseguir
+                if(command.equals("ACK")){  
                     if(role.equals("CONSUMER")){ // serei consumidor
+                        System.out.println("Sou CONSUMER");
                         serverSocket.close();
                         clientSocket.close();
                         Consumer.execute(coordId);
                         return;
                     }
                     else{ // serei produtor
+                        System.out.println("Sou PRODUCER");
                         serverSocket.close();
                         clientSocket.close();
                         Producer.execute(coordId);
