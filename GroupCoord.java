@@ -63,7 +63,6 @@ public class GroupCoord{
                 System.out.println("Mensagem recebida: "+sentence);
 
                 String array[] = sentence.split("-");
-                System.out.println(sentence);
                 String request = array[0];
                 int requesterId = Integer.parseInt(array[1]);
                 String requesterIp = array[2];

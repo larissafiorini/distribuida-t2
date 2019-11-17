@@ -24,7 +24,7 @@ public class Producer{
             
             if(socketType == 1){
                 serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
-                serverSocket.setSoTimeout(10000); // 10 segundos acontece timeout
+                serverSocket.setSoTimeout(2000); // 2 segundos acontece timeout
             }
             else{
                 clientSocket = new DatagramSocket();
@@ -350,7 +350,6 @@ public class Producer{
                 System.out.println("Mensagem recebida: "+sentence);
 
                 String array[] = sentence.split("-");
-                System.out.println(sentence);
                 String request = array[0];
                 int requesterId = Integer.parseInt(array[1]);
                 String requesterIp = array[2];
@@ -374,6 +373,7 @@ public class Producer{
                     }
                 }
                 if(request.equals("NEWCOORD")){ // novo coordenador na area, aponto coord para ele
+                    System.out.println("Novo coordenador: "+requesterId);
                     myCoord = new Stats(requesterId,requesterIp,requesterPort);
                 }
             }
