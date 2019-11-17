@@ -1,6 +1,7 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 /**
  * Codigo implementado baseado na definicao do problema de produtores e consumidores 
@@ -22,6 +23,7 @@ public class Producer{
             
             if(socketType == 1){
                 serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
+                serverSocket.setSoTimeout(10000); // 10 segundos acontece timeout
             }
             else{
                 clientSocket = new DatagramSocket();
@@ -53,7 +55,7 @@ public class Producer{
             while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 5){ // a cada cinco segundos eu tento entrar
+                if(((now - lastPing)/1000) >= 10){ // a cada dez segundos eu tento entrar
 
                     System.out.println("Tentando produzir...");
 
@@ -179,6 +181,10 @@ public class Producer{
                     break;
             }
         }
+        catch(SocketTimeoutException e){
+            // coord esta morto? Chamo eleicao
+            callElection();
+        }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
             exception.printStackTrace();
@@ -218,6 +224,10 @@ public class Producer{
                     break;
             }
         }
+        catch(SocketTimeoutException e){
+            // coord esta morto? Chamo eleicao
+            callElection();
+        }
         catch(Exception exception){
             System.out.println("Excecao no producer: "+exception.getMessage());
             exception.printStackTrace();
@@ -244,25 +254,30 @@ public class Producer{
     public static void callElection(){
         try{
             for(int i = 0; i < Bully.neighbours.size(); i++ ){
-                if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
-                    
-                    String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
-                    sendData = message.getBytes();
-                    
-                    Stats candidate = Bully.neighbours.get(i);
-                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
-                    clientSocket.send(sendPacket);
-                    // agora preciso receber a mensagem de retorno
-                    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                    serverSocket.receive(receivePacket);
-                    
-                    String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
-                    String array[] = sentence.split("-");
+                try{
+                    if(Bully.neighbours.get(i).idNumber > Bully.myStats.idNumber){ //envia msg de eleição para todos os processos com IDs maiores que o dele
+                        
+                        String message = "ELECTION-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                        sendData = message.getBytes();
+                        
+                        Stats candidate = Bully.neighbours.get(i);
+                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                        clientSocket.send(sendPacket);
+                        // agora preciso receber a mensagem de retorno
+                        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                        serverSocket.receive(receivePacket);
+                        
+                        String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                        String array[] = sentence.split("-");
 
-                    int idNumber = Integer.parseInt(array[1]);
-                    if(idNumber > Bully.myStats.idNumber){ // Se algum processo com ID maior responde, ele desiste
-                        return;
+                        int idNumber = Integer.parseInt(array[1]);
+                        if(idNumber > Bully.myStats.idNumber){ // Se algum processo com ID maior responde, ele desiste
+                            return;
+                        }
                     }
+                }
+                catch(SocketTimeoutException e){
+                    continue;
                 }
             }
             //Se ninguém responde, P vence eleição e torna-se coordenador

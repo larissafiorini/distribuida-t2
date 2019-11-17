@@ -1,6 +1,7 @@
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 /**
  * Codigo implementado baseado na definicao do problema de produtores e consumidores 
@@ -19,8 +20,8 @@ public class GroupMember{
 
         try{
             serverSocket = new DatagramSocket(Bully.myStats.portNumber,InetAddress.getByName(Bully.myStats.ipAddress));
+            serverSocket.setSoTimeout(10000); // 10 segundos acontece timeout
             clientSocket = new DatagramSocket();
-
         }
         catch(Exception exception){
             System.out.println("Excecao ao criar Datagrama: "+exception.toString());
@@ -65,16 +66,17 @@ public class GroupMember{
                         return;
                     }
                 }
-                else{ // coord esta morto? Espero algum tempo e peço de novo
-                    long lastPing = System.currentTimeMillis();
-                    while(true){
+            }
+        }
+        catch(SocketTimeoutException e){
+            // coord esta morto? Espero algum tempo e peço de novo
+            long lastPing = System.currentTimeMillis();
+            while(true){
 
-                        long now = System.currentTimeMillis();
+                long now = System.currentTimeMillis();
 
-                        if(((now - lastPing)/1000) >= 10){
-                            break;
-                        }
-                    }
+                if(((now - lastPing)/1000) >= 10){
+                    execute(coordId);
                 }
             }
         }
