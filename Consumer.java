@@ -16,6 +16,7 @@ public class Consumer{
     private static DatagramSocket serverSocket;
     private static DatagramSocket clientSocket;
     private static Stats myCoord;
+    private static boolean exit = false;
 
     // Metodo para inicializar os sockets globais
     private static void initSocket(int socketType){
@@ -46,6 +47,17 @@ public class Consumer{
                     incrementa(mutex);                  incrementa(mutex);
                     incrementa(cheio);                  incrementa(vazio);
         */
+        try {
+            Thread t = new Thread() {
+                public void run() {
+                    waitForElections();
+                }
+            };
+            t.start();
+        } 
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         try{
             initSocket(1);
             initSocket(2);
@@ -259,8 +271,15 @@ public class Consumer{
                         sendData = message.getBytes();
                         
                         Stats candidate = Bully.neighbours.get(i);
-                        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
-                        clientSocket.send(sendPacket);
+                        
+                        if(candidate.idNumber == myCoord.idNumber){ // coord ouve na porta original
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
+                            clientSocket.send(sendPacket);
+                        }
+                        else{ // membros ouvem na porta+1
+                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber+1);
+                            clientSocket.send(sendPacket);
+                        }
                         // agora preciso receber a mensagem de retorno
                         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                         serverSocket.receive(receivePacket);
@@ -286,14 +305,79 @@ public class Consumer{
                 sendData = message.getBytes();
                 
                 Stats neighbour = Bully.neighbours.get(i);
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
-                clientSocket.send(sendPacket);
-                    
+
+                if(neighbour.idNumber == myCoord.idNumber){
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
+                    clientSocket.send(sendPacket);
+                }
+                else{
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber+1);
+                    clientSocket.send(sendPacket);
+                }       
             }
+            clientSocket.close();
+            serverSocket.close();
+            exit = true;
             GroupCoord.execute();
         }
         catch(Exception exception){
-            System.out.println("Excecao no consumer: "+exception.getMessage());
+            System.out.println("Excecao no producer: "+exception.getMessage());
+            exception.printStackTrace();
+        }
+    }
+
+    public static void waitForElections(){
+
+        byte[] electionData = new byte[1024];
+        DatagramSocket electionSocket; // ouco na porta+1
+
+        try{
+            electionSocket = new DatagramSocket(Bully.myStats.portNumber+1,InetAddress.getByName(Bully.myStats.ipAddress));
+
+            while(true){
+                if(exit){
+                    electionSocket.close();
+                    return;
+                }
+                DatagramPacket receivePacket = new DatagramPacket(electionData, electionData.length);
+                electionSocket.receive(receivePacket);
+
+
+                String sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                
+                System.out.println("Mensagem recebida: "+sentence);
+
+                String array[] = sentence.split("-");
+                System.out.println(sentence);
+                String request = array[0];
+                int requesterId = Integer.parseInt(array[1]);
+                String requesterIp = array[2];
+                int requesterPort = Integer.parseInt(array[3]);
+
+                if(request.equals("ELECTION")){ // se o pedido for de uma nova eleicao
+                            
+                    // comparo nossos ids e envio uma resposta
+                    String message = "STATUS-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    sendData = message.getBytes();
+                        
+                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
+                    clientSocket.send(sendPacket);
+
+                    if(requesterId < Bully.myStats.idNumber){
+                        /**
+                        • Quando processo recebe msg de eleição de membros com ID mais baixa
+                        • Envia OK para remetente para indicar que está vivo e convoca eleição
+                        */
+                        callElection();
+                    }
+                }
+                if(request.equals("NEWCOORD")){ // novo coordenador na area, aponto coord para ele
+                    myCoord = new Stats(requesterId,requesterIp,requesterPort);
+                }
+            }
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no producer: "+exception.getMessage());
             exception.printStackTrace();
         }
     }

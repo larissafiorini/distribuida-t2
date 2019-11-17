@@ -76,6 +76,8 @@ public class GroupMember{
                 long now = System.currentTimeMillis();
 
                 if(((now - lastPing)/1000) >= 10){
+                    clientSocket.close();
+                    serverSocket.close();
                     execute(coordId);
                 }
             }
