@@ -31,7 +31,7 @@ public class Member{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -50,7 +50,7 @@ public class Member{
         try {
             Thread t = new Thread() {
                 public void run() {
-                    waitForElections();
+                    waitForElections(); // thread separada fica ouvindo por eleicoes
                 }
             };
             t.start();
@@ -61,18 +61,19 @@ public class Member{
         try{
             initSocket(1);
             initSocket(2);
+
             myCoord = Bully.neighbours.get(Bully.findMemberById(coordId)); // meu primeiro coord é o cara com id maior
+            
             long lastPing = System.currentTimeMillis();
 
             while(true){ // fico enviando pedidos de acesso e producao de tempos em tempos
                 long now = System.currentTimeMillis();
 
-                if(((now - lastPing)/1000) >= 10){ // a cada dez segundos eu tento entrar
-
-                    System.out.println("Tentando produzir...");
+                if(((now - lastPing)/1000) >= 1){ // a cada segundo eu tento entrar
 
                     lastPing = System.currentTimeMillis();
                     if(role == 1){
+
                         P(1);
                         P(2);
                         Produce();
@@ -80,6 +81,7 @@ public class Member{
                         V(3);
                     }
                     else{
+
                         P(3);
                         P(2);
                         Consume();
@@ -90,7 +92,7 @@ public class Member{
             }
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -253,7 +255,7 @@ public class Member{
             callElection();
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -309,7 +311,7 @@ public class Member{
             callElection();
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -325,7 +327,7 @@ public class Member{
             clientSocket.send(sendPacket);
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
@@ -341,13 +343,16 @@ public class Member{
             clientSocket.send(sendPacket);
         }
         catch(Exception exception){
-            System.out.println("Excecao no consumer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
 
     // Metodo que performa uma eleicao
     public static void callElection(){
+
+        System.out.println("Chamando eleicao...");
+
         try{
             for(int i = 0; i < Bully.neighbours.size(); i++ ){
                 try{
@@ -358,14 +363,12 @@ public class Member{
                         
                         Stats candidate = Bully.neighbours.get(i);
                         
-                        if(candidate.idNumber == myCoord.idNumber){ // coord ouve na porta original
-                            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber);
-                            clientSocket.send(sendPacket);
-                        }
-                        else{ // membros ouvem na porta+1
+                        if(candidate.idNumber != myCoord.idNumber){
+                            // membros ouvem na porta+1
                             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(candidate.ipAddress), candidate.portNumber+1);
                             clientSocket.send(sendPacket);
                         }
+              
                         // agora preciso receber a mensagem de retorno
                         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                         serverSocket.receive(receivePacket);
@@ -375,6 +378,7 @@ public class Member{
 
                         int idNumber = Integer.parseInt(array[1]);
                         if(idNumber > Bully.myStats.idNumber){ // Se algum processo com ID maior responde, ele desiste
+                            System.out.println("Perdi a eleicao...");
                             return;
                         }
                     }
@@ -385,6 +389,9 @@ public class Member{
             }
             //Se ninguém responde, P vence eleição e torna-se coordenador
             //enviar mensagens a todos avisando sobre novo coord
+
+            System.out.println("Ganhei a eleicao...");
+
             for(int i = 0; i < Bully.neighbours.size(); i++ ){
                     
                 String message = "NEWCOORD-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
@@ -392,14 +399,10 @@ public class Member{
                 
                 Stats neighbour = Bully.neighbours.get(i);
 
-                if(neighbour.idNumber == myCoord.idNumber){
-                    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber);
-                    clientSocket.send(sendPacket);
-                }
-                else{
+                if(neighbour.idNumber != myCoord.idNumber){
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(neighbour.ipAddress), neighbour.portNumber+1);
                     clientSocket.send(sendPacket);
-                }       
+                }     
             }
             clientSocket.close();
             serverSocket.close();
@@ -407,21 +410,23 @@ public class Member{
             GroupCoord.execute();
         }
         catch(Exception exception){
-            System.out.println("Excecao no producer: "+exception.getMessage());
+            System.out.println("Excecao: "+exception.getMessage());
             exception.printStackTrace();
         }
     }
 
     public static void waitForElections(){
 
-        byte[] electionData = new byte[1024];
-        DatagramSocket electionSocket; // ouco na porta+1
-
         try{
+            byte[] electionData = new byte[1024];
+            DatagramSocket electionSocket; // ouco na porta+1
             electionSocket = new DatagramSocket(Bully.myStats.portNumber+1,InetAddress.getByName(Bully.myStats.ipAddress));
 
             while(true){
                 if(exit){
+
+                    System.out.println("Parando de ouvir por eleicoes...");
+
                     electionSocket.close();
                     return;
                 }
@@ -457,7 +462,9 @@ public class Member{
                     }
                 }
                 if(request.equals("NEWCOORD")){ // novo coordenador na area, aponto coord para ele
+
                     System.out.println("Novo coordenador: "+requesterId);
+                    
                     myCoord = new Stats(requesterId,requesterIp,requesterPort);
                 }
             }
