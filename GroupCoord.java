@@ -46,9 +46,10 @@ public class GroupCoord{
     public static void execute(){
 
         try{
-
+            System.out.println("Coord iniciando...");
             initSocket(1);
             initSocket(2);
+            System.out.println("Coord inicializado...");
             
             while(true){
 
@@ -122,6 +123,13 @@ public class GroupCoord{
                         
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(requesterIp), requesterPort);
                     clientSocket.send(sendPacket);
+                }
+
+                else if(request.equals("NEWCOORD")){
+                    clientSocket.close();
+                    serverSocket.close();
+                    GroupMember.execute(requesterId);
+                    return;
                 }
 
                 else{ // se eu receber uma mensagem que nao reconheço 
