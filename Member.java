@@ -9,7 +9,7 @@ import java.net.SocketTimeoutException;
  * @author Igor Sgorla Brehm, Larissa Fiorini e Rodrigo Mello
  */
 
-public class Producer{
+public class Member{
 
     private static byte[] receiveData = new byte[1024];
     private static byte[] sendData = new byte[1024];
@@ -37,7 +37,7 @@ public class Producer{
     }
 
     // Metodo que performa a logica de um produtor
-    public static void execute(int coordId){
+    public static void execute(int coordId, int role){
         /*   
             Produtor:                           Consumidor:
                 while (true)                        while (true)
@@ -72,11 +72,20 @@ public class Producer{
                     System.out.println("Tentando produzir...");
 
                     lastPing = System.currentTimeMillis();
-                    P(1);
-                    P(2);
-                    Produce();
-                    V(2);
-                    V(3);
+                    if(role == 1){
+                        P(1);
+                        P(2);
+                        Produce();
+                        V(2);
+                        V(3);
+                    }
+                    else{
+                        P(3);
+                        P(2);
+                        Consume();
+                        V(2);
+                        V(1);
+                    }
                 }
             }
         }
@@ -189,6 +198,52 @@ public class Producer{
                     else{ // se eu receber uma mensagem que nao reconheço 
                         throw new Exception("Mensagem Invalida Recebida: "+command); // lanco uma nova excessao
                     }
+                case 3: // PCHEIO
+                    message = "PCHEIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    sendData = message.getBytes();
+
+                    System.out.println("P(cheio)...");
+
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                    serverSocket.receive(receivePacket);
+                    
+                    sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                    array = sentence.split("-");
+                    command = array[0];
+                    value = array[1];
+
+                    if(command.equals("STATUS")){
+                        // se entrou apenas retorna
+                        if(value.equals("HASACCESS")){
+
+                            System.out.println("Entrei no semaforo...");
+
+                            return;
+                        }
+                        // se ficou na fila fica esperando ate receber mensagem que entrou
+                        while(true){
+
+                            System.out.println("Estou na fila...");
+
+                            receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                            serverSocket.receive(receivePacket);
+                            
+                            sentence = new String(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
+                            array = sentence.split("-");
+                            command = array[0];
+                            value = array[1];
+                            // se entrou apenas retorna
+                            if(value.equals("HASACCESS")){
+
+                                System.out.println("Entrei no semaforo...");
+
+                                return;
+                            }
+                        }
+                    }
                 default:
                     break;
             }
@@ -206,16 +261,29 @@ public class Producer{
     public static void V(int numSemaforo){
         try{
             switch(numSemaforo){
-                case 2: // VMUTEX
-                    String message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                case 1: // VVAZIO
+                    String message = "VVAZIO-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
                     sendData = message.getBytes();
 
-                    System.out.println("V(mutex)...");
+                    System.out.println("V(vazio)...");
 
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
                     clientSocket.send(sendPacket);
                     // agora preciso receber a mensagem de retorno
                     DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                    serverSocket.receive(receivePacket);
+                                        
+                    return;
+                case 2: // VMUTEX
+                    message = "VMUTEX-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+                    sendData = message.getBytes();
+
+                    System.out.println("V(mutex)...");
+
+                    sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+                    clientSocket.send(sendPacket);
+                    // agora preciso receber a mensagem de retorno
+                    receivePacket = new DatagramPacket(receiveData, receiveData.length);
                     serverSocket.receive(receivePacket);
                                         
                     return;
@@ -262,6 +330,22 @@ public class Producer{
         }
     }
     
+    public static void Consume(){
+        try{
+            String message = "CONSUME-"+Bully.myStats.idNumber+"-"+Bully.myStats.ipAddress+"-"+Bully.myStats.portNumber;
+            sendData = message.getBytes();
+
+            System.out.println("Consumindo...");
+
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(myCoord.ipAddress), myCoord.portNumber);
+            clientSocket.send(sendPacket);
+        }
+        catch(Exception exception){
+            System.out.println("Excecao no consumer: "+exception.getMessage());
+            exception.printStackTrace();
+        }
+    }
+
     // Metodo que performa uma eleicao
     public static void callElection(){
         try{

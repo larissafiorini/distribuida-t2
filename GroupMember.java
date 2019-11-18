@@ -55,14 +55,14 @@ public class GroupMember{
                         System.out.println("Sou CONSUMER");
                         serverSocket.close();
                         clientSocket.close();
-                        Consumer.execute(coordId);
+                        Member.execute(coordId,2);
                         return;
                     }
                     else{ // serei produtor
                         System.out.println("Sou PRODUCER");
                         serverSocket.close();
                         clientSocket.close();
-                        Producer.execute(coordId);
+                        Member.execute(coordId,1);
                         return;
                     }
                 }
