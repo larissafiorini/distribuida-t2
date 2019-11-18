@@ -42,6 +42,7 @@ public class Bully {
       }
       aux++;
     }
+    configReader.close();
     
     if(myStats.idNumber == biggestId){ // na inicializacao do sistema o membro com id maior e o primeiro coord
       System.out.println("Sou coordenador");
